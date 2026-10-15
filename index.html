@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Armería - Táctico</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        /* Pantalla de Login */
+        #loginScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            text-align: center;
+        }
+        .login-card {
+            background: #1E1E1E;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 350px;
+        }
+        .login-card h3 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #252525;
+            border: 1px solid #444;
+            color: #FFF;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .login-card button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2E7D32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .error-msg {
+            color: #EF5350;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* App Principal (Oculta hasta iniciar sesión) */
+        #appScreen {
+            display: none;
+        }
+        h2 {
+            color: #4CAF50;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #1E1E1E;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .stat-box {
+            text-align: center;
+            background: #252525;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .stat-title {
+            font-size: 11px;
+            color: #AAA;
+            margin-bottom: 4px;
+        }
+        .stat-num {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .filter-container {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        select {
+            background: #1E1E1E;
+            color: #FFF;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 6px;
+            flex: 1;
+        }
+        .card {
+            background: #1E1E1E;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4CAF50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info div {
+            margin-bottom: 2px;
+        }
+        .name {
+            font-weight: bold;
+            font-size: 15px;
+            color: #FFF;
+        }
+        .details {
+            font-size: 12px;
+            color: #AAAAAA;
+        }
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #333;
+            color: #ddd;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .btn-accion {
+            background-color: #2E7D32;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .btn-accion.entregado {
+            background-color: #C62828;
+        }
+        .logout-btn {
+            background: #333;
+            color: #aaa;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h3>ACCESO ARMERÍA</h3>
+            <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Ingrese credenciales de servicio</p>
+            <input type="text" id="usuario" placeholder="Usuario / CIP">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="verificarLogin()">INGRESAR</button>
+            <div id="errorMsg" class="error-msg">Credenciales incorrectas</div>
+        </div>
+    </div>
+
+    <!-- PANTALLA PRINCIPAL DE LA APP -->
+    <div id="appScreen" class="container">
+        <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <h2>CONTROL DE ARMAMENTO Y MUNICIÓN</h2>
+        <div class="subtitle">Módulo de Arsenal - Oficiales, Suboficiales y Tropa</div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-title">TOTAL REGISTRADOS</div>
+                <div class="stat-num" id="totalCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">EN ALMACÉN (PAÑOL)</div>
+                <div class="stat-num" id="arsenalCount" style="color: #4CAF50;">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">ASIGNADOS / FUERA</div>
+                <div class="stat-num" id="outCount" style="color: #EF5350;">0</div>
+            </div>
+        </div>
+
+        <div class="filter-container">
+            <select id="filtroJerarquia" onchange="actualizarVista()">
+                <option value="TODOS">Mostrar Todas las Jerarquías</option>
+                <option value="Oficiales">Oficiales</option>
+                <option value="Suboficiales">Suboficiales</option>
+                <option value="Tropa">Tropa</option>
+            </select>
+        </div>
+
+        <div id="armasLista"></div>
+    </div>
+
+    <script>
+        // Sistema de Login simple
+        function verificarLogin() {
+            const user = document.getElementById('usuario').value;
+            const pass = document.getElementById('password').value;
+
+            // Credenciales de prueba (puedes cambiarlas aquí)
+            if (user === "armero" && pass === "1234") {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appScreen').style.display = 'block';
+                actualizarVista();
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        function cerrarSesion() {
+            document.getElementById('appScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('usuario').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        let registros = [
+            { id: 1, categoria: "Oficiales", efectivo: "Cap. Inf. Salas, J.", arma: "Pistola Browning 9mm", serie: "P-99120", municion: "2 cacerinas (26 municiones)", enArsenal: false },
+            { id: 2, categoria: "Oficiales", efectivo: "Tte. Art. Gomez, M.", arma: "Pistola Browning 9mm", serie: "P-99145", municion: "2 cacerinas (26 municiones)", enArsenal: true },
+            { id: 3, categoria: "Suboficiales", efectivo: "Tec. 1° Adm. Quispe, R.", arma: "Fusil FAL 7.62mm", serie: "A-40291", municion: "3 cacerinas (60 municiones)", enArsenal: true },
+            { id: 4, categoria: "Suboficiales", efectivo: "Sgto. 1° Com. Torres, L.", arma: "Fusil FAL 7.62mm", serie: "A-40315", municion: "3 cacerinas (60 municiones)", enArsenal: true },
+            { id: 5, categoria: "Suboficiales", efectivo: "Sgto. 2° Art. Cardenas, P.", arma: "Fusil FAL 7.62mm", serie: "A-40488", municion: "3 cacerinas (60 municiones)", enArsenal: false },
+            { id: 6, categoria: "Tropa", efectivo: "Cbo. Inf. Silva, E.", arma: "Fusil FAL 7.62mm", serie: "A-40108", municion: "3 cacerinas (60 municiones)", enArsenal: true },
+            { id: 7, categoria: "Tropa", efectivo: "Cbo. Art. Huaman, D.", arma: "Fusil FAL 7.62mm", serie: "A-40522", municion: "3 cacerinas (60 municiones)", enArsenal: true },
+            { id: 8, categoria: "Tropa", efectivo: "Soldado Inf. Ramos, K.", arma: "Fusil FAL 7.62mm", serie: "A-40610", municion: "3 cacerinas (60 municiones)", enArsenal: false }
+        ];
+
+        function actualizarVista() {
+            const contenedor = document.getElementById('armasLista');
+            const filtroSeleccionado = document.getElementById('filtroJerarquia').value;
+            contenedor.innerHTML = '';
+
+            let enArsenalTotal = 0;
+            let fueraTotal = 0;
+
+            registros.forEach(r => {
+                if (r.enArsenal) {
+                    enArsenalTotal++;
+                } else {
+                    fueraTotal++;
+                }
+
+                if (filtroSeleccionado !== "TODOS" && r.categoria !== filtroSeleccionado) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.borderLeftColor = r.enArsenal ? '#4CAF50' : '#C62828';
+
+                card.innerHTML = `
+                    <div class="info">
+                        <div><span class="badge">${r.categoria}</span><span class="name">${r.efectivo}</span></div>
+                        <div class="details">🔫 <b>${r.arma}</b> (N° Serie: ${r.serie})</div>
+                        <div class="details">📦 Munición: ${r.municion}</div>
+                    </div>
+                    <button class="btn-accion ${r.enArsenal ? '' : 'entregado'}" onclick="cambiarEstado(${r.id})">
+                        ${r.enArsenal ? 'ENTREGAR' : 'EN ALMACÉN'}
+                    </button>
+                `;
+                contenedor.appendChild(card);
+            });
+
+            document.getElementById('totalCount').innerText = registros.length;
+            document.getElementById('arsenalCount').innerText = enArsenalTotal;
+            document.getElementById('outCount').innerText = fueraTotal;
+        }
+
+        function cambiarEstado(id) {
+            let item = registros.find(r => r.id === id);
+            if (item) {
+                item.enArsenal = !item.enArsenal;
+                actualizarVista();
+            }
+        }
+    </script>
+</body>
+</html>
